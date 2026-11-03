@@ -6,11 +6,13 @@ import { Navbar } from "./components/Navbar";
 function App() {
   return (
     <BrowserRouter>
-     <Navbar/>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
+      <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </div>
     </BrowserRouter>
   );
 }

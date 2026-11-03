@@ -6,7 +6,7 @@ export const ProductCard = ({product}:{product : Product}) => {
     <div className="flex h-full w-full max-w-sm flex-col rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <Link to={`/productos/${product?.id}`}>
         <img
-          className="h-64 w-full rounded-t-lg object-contain p-8"
+          className="h-64 w-full rounded-t-lg bg-white object-contain p-8 dark:bg-slate-800"
           src={product?.thumbnail}
           alt={product?.title}
         />
