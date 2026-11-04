@@ -1,7 +1,7 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { persistProducts, useProducts } from "../hooks/useProducts";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useProducts } from "../hooks/useProducts";
 import type { Product } from "../interfaces/product.interface";
-import Swal from "sweetalert2";
 
 interface ProductForm {
   title: string;
@@ -19,27 +19,24 @@ const emptyForm: ProductForm = {
 
 export const AdminDashboard = () => {
   const { products, isLoading, error } = useProducts();
-  const [adminProducts, setAdminProducts] = useState<Product[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [form, setForm] = useState<ProductForm>(emptyForm);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isLoading && !error) setAdminProducts(products);
-  }, [products, isLoading, error]);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ProductForm>({ defaultValues: emptyForm });
 
   const openCreateForm = () => {
-    setActionError(null);
     setEditingProduct(null);
-    setForm(emptyForm);
+    reset(emptyForm);
     setIsFormOpen(true);
   };
 
   const openEditForm = (product: Product) => {
-    setActionError(null);
     setEditingProduct(product);
-    setForm({
+    reset({
       title: product.title,
       rating: String(product.rating),
       price: String(product.price),
@@ -48,61 +45,8 @@ export const AdminDashboard = () => {
     setIsFormOpen(true);
   };
 
-  const commitProducts = (updatedProducts: Product[]) => {
-    try {
-      persistProducts(updatedProducts);
-      setAdminProducts(updatedProducts);
-      setActionError(null);
-      return true;
-    } catch (error) {
-      console.error("Error al guardar el catálogo en este navegador", error);
-      setActionError(
-        "No se pudieron guardar los cambios en este navegador. Revisá el espacio disponible.",
-      );
-      return false;
-    }
-  };
-
-  const saveProduct = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const updatedProduct: Product = {
-      id: editingProduct?.id ?? Math.max(0, ...adminProducts.map(({ id }) => id)) + 1,
-      title: form.title.trim(),
-      rating: Number(form.rating),
-      price: Number(form.price),
-      thumbnail: form.thumbnail.trim(),
-    };
-
-    const updatedProducts = editingProduct
-      ? adminProducts.map((product) =>
-          product.id === editingProduct.id ? updatedProduct : product,
-        )
-      : [updatedProduct, ...adminProducts];
-
-    if (commitProducts(updatedProducts)) setIsFormOpen(false);
-  };
-
-  const deleteProduct = (product: Product) => {
-    Swal.fire({
-      title: "¿Estás seguro?",
-      text: "Esta acción no se puede deshacer.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Sí, borrar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const updatedProducts = adminProducts.filter((p) => p.id !== product.id);
-        if (commitProducts(updatedProducts)) {
-          Swal.fire({
-            title: "Borrado",
-            text: "El producto ha sido borrado.",
-            icon: "success",
-          });
-        }
-      }
-    });
+  const onSubmit = (_data: ProductForm) => {
+    // Implementar aquí la creación o edición del producto.
   };
 
   return (
@@ -144,7 +88,7 @@ export const AdminDashboard = () => {
                 Productos en catálogo
               </p>
               <p className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
-                {isLoading ? "…" : adminProducts.length}
+                {isLoading ? "…" : products.length}
               </p>
             </div>
           </section>
@@ -169,7 +113,6 @@ export const AdminDashboard = () => {
               <p className="text-slate-600 dark:text-slate-300">Cargando productos...</p>
             )}
             {error && <p role="alert" className="mb-4 text-red-600 dark:text-red-400">{error}</p>}
-            {actionError && <p role="alert" className="mb-4 text-red-600 dark:text-red-400">{actionError}</p>}
             {!isLoading && (
               <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <table className="w-full min-w-3xl text-left text-sm">
@@ -183,7 +126,7 @@ export const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                    {adminProducts.map((product) => (
+                    {products.map((product) => (
                       <tr key={product.id} className="text-slate-700 dark:text-slate-200">
                         <td className="px-4 py-3">
                           {product.thumbnail ? (
@@ -210,7 +153,6 @@ export const AdminDashboard = () => {
                             </button>
                             <button
                               type="button"
-                              onClick={() => deleteProduct(product)}
                               className="rounded-md border border-red-600 px-3 py-1.5 font-medium text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-slate-800"
                             >
                               Borrar
@@ -219,7 +161,7 @@ export const AdminDashboard = () => {
                         </td>
                       </tr>
                     ))}
-                    {adminProducts.length === 0 && (
+                    {products.length === 0 && (
                       <tr>
                         <td colSpan={5} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
                           No hay productos para mostrar.
@@ -250,19 +192,33 @@ export const AdminDashboard = () => {
             <h2 id="product-form-title" className="text-2xl font-bold text-slate-900 dark:text-white">
               {editingProduct ? "Editar producto" : "Crear producto"}
             </h2>
-            <form className="mt-5 space-y-4" onSubmit={saveProduct}>
+            <form
+              className="mt-5 space-y-4"
+              noValidate
+              onSubmit={handleSubmit(onSubmit)}
+            >
               <div>
                 <label htmlFor="product-title" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
                   Nombre
                 </label>
                 <input
                   id="product-title"
-                  required
-                  maxLength={120}
-                  value={form.title}
-                  onChange={(event) => setForm({ ...form, title: event.target.value })}
+                  aria-invalid={Boolean(errors.title)}
+                  aria-describedby={errors.title ? "product-title-error" : undefined}
+                  {...register("title", {
+                    required: "El nombre es obligatorio.",
+                    maxLength: {
+                      value: 120,
+                      message: "El nombre no puede superar los 120 caracteres.",
+                    },
+                  })}
                   className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
+                {errors.title && (
+                  <p id="product-title-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.title.message}
+                  </p>
+                )}
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
@@ -272,13 +228,20 @@ export const AdminDashboard = () => {
                   <input
                     id="product-price"
                     type="number"
-                    min="0"
                     step="0.01"
-                    required
-                    value={form.price}
-                    onChange={(event) => setForm({ ...form, price: event.target.value })}
+                    aria-invalid={Boolean(errors.price)}
+                    aria-describedby={errors.price ? "product-price-error" : undefined}
+                    {...register("price", {
+                      required: "El precio es obligatorio.",
+                      min: { value: 0, message: "El precio no puede ser negativo." },
+                    })}
                     className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
+                  {errors.price && (
+                    <p id="product-price-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                      {errors.price.message}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="product-rating" className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
@@ -287,14 +250,21 @@ export const AdminDashboard = () => {
                   <input
                     id="product-rating"
                     type="number"
-                    min="0"
-                    max="5"
                     step="0.1"
-                    required
-                    value={form.rating}
-                    onChange={(event) => setForm({ ...form, rating: event.target.value })}
+                    aria-invalid={Boolean(errors.rating)}
+                    aria-describedby={errors.rating ? "product-rating-error" : undefined}
+                    {...register("rating", {
+                      required: "La calificación es obligatoria.",
+                      min: { value: 0, message: "La calificación mínima es 0." },
+                      max: { value: 5, message: "La calificación máxima es 5." },
+                    })}
                     className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
+                  {errors.rating && (
+                    <p id="product-rating-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                      {errors.rating.message}
+                    </p>
+                  )}
                 </div>
               </div>
               <div>
@@ -304,10 +274,21 @@ export const AdminDashboard = () => {
                 <input
                   id="product-thumbnail"
                   type="url"
-                  value={form.thumbnail}
-                  onChange={(event) => setForm({ ...form, thumbnail: event.target.value })}
+                  aria-invalid={Boolean(errors.thumbnail)}
+                  aria-describedby={errors.thumbnail ? "product-thumbnail-error" : undefined}
+                  {...register("thumbnail", {
+                    pattern: {
+                      value: /^https?:\/\/.+/i,
+                      message: "Ingresá una URL que comience con http:// o https://.",
+                    },
+                  })}
                   className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
+                {errors.thumbnail && (
+                  <p id="product-thumbnail-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.thumbnail.message}
+                  </p>
+                )}
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button
