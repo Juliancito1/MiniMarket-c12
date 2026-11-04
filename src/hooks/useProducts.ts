@@ -4,41 +4,14 @@ import type { Product } from "../interfaces/product.interface";
 
 const PRODUCTS_STORAGE_KEY = "admin_products";
 
-const isProductList = (value: unknown): value is Product[] =>
-  Array.isArray(value) &&
-  value.every(
-    (product) =>
-      typeof product === "object" &&
-      product !== null &&
-      "id" in product &&
-      typeof product.id === "number" &&
-      "title" in product &&
-      typeof product.title === "string" &&
-      "rating" in product &&
-      typeof product.rating === "number" &&
-      "price" in product &&
-      typeof product.price === "number" &&
-      "thumbnail" in product &&
-      typeof product.thumbnail === "string",
-  );
-
 const readSavedProducts = (): Product[] | null => {
   try {
     const savedProducts = localStorage.getItem(PRODUCTS_STORAGE_KEY);
     if (savedProducts === null) return null;
 
-    const parsedProducts: unknown = JSON.parse(savedProducts);
-    if (!isProductList(parsedProducts)) {
-      throw new Error("El catálogo guardado no tiene un formato válido.");
-    }
-    return parsedProducts;
+    return JSON.parse(savedProducts) as Product[];
   } catch (error) {
     console.error("Error al leer el catálogo guardado", error);
-    try {
-      localStorage.removeItem(PRODUCTS_STORAGE_KEY);
-    } catch (storageError) {
-      console.error("Error al limpiar el catálogo guardado", storageError);
-    }
     return null;
   }
 };
