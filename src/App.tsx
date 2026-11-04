@@ -1,7 +1,18 @@
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
 import { Navbar } from "./components/Navbar";
+import { AdminDashboard } from "./pages/AdminDashboard";
+import { useAuth } from "./context/AuthContext";
+
+const AdminRoute = () => {
+  const { user } = useAuth();
+
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== "admin") return <Navigate to="/" replace />;
+
+  return <AdminDashboard />;
+};
 
 function App() {
   return (
@@ -11,6 +22,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<AdminRoute />} />
         </Routes>
       </div>
     </BrowserRouter>

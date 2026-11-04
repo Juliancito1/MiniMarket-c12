@@ -50,9 +50,19 @@ export const Navbar = () => {
           </NavLink>
           {authContext?.user ? (
             <>
-              <span className="max-w-48 truncate text-sm text-slate-600 me-2 dark:text-slate-300">
-                Hola "{authContext?.user.name}"
-              </span>
+              {authContext.user.role === "admin" ? (
+                <NavLink
+                  to="/admin"
+                  className="w-max text-slate-700 hover:text-emerald-700 dark:text-slate-200 dark:hover:text-emerald-300 lg:mx-2"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Panel de Administración
+                </NavLink>
+              ) : (
+                <span className="me-2 max-w-48 truncate text-sm text-slate-600 dark:text-slate-300">
+                  Hola "{authContext.user.name}"
+                </span>
+              )}
               <button
                 type="button"
                 className="w-max text-slate-700 hover:text-blue-600 dark:text-slate-200"

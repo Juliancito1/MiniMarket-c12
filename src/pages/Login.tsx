@@ -40,8 +40,9 @@ export const Login = () => {
         id: foundUser?.id,
         name: foundUser?.name,
         email: data.email,
+        role: foundUser.role,
       });
-      navigate("/");
+      navigate(foundUser.role === "admin" ? "/admin" : "/");
     } else {
       Swal.fire({
         title: "Error",

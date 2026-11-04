@@ -1,4 +1,4 @@
-import {useEffect, useState, type ReactNode} from "react";
+import { useState, type ReactNode } from "react";
 import { AuthContext, type User } from "./AuthContext";
 import Swal from "sweetalert2";
 
@@ -8,20 +8,25 @@ interface AuthProviderProps {
 
 
 export const AuthProvider = ({children}: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
-
-
-  useEffect(() => {
+  const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem("auth_user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error("Error al parsear el usuario de localStorage", error);
-        localStorage.removeItem("auth_user");
-      }
+    if (!storedUser) return null;
+
+    try {
+      const parsedUser: User = JSON.parse(storedUser);
+
+      return {
+        id: parsedUser.id,
+        name: parsedUser.name,
+        email: parsedUser.email,
+        role: "role" in parsedUser && parsedUser.role === "admin" ? "admin" : "user",
+      };
+    } catch (error) {
+      console.error("Error al parsear el usuario de localStorage", error);
+      localStorage.removeItem("auth_user");
+      return null;
     }
-  }, []);
+  });
 
 
   const login = (userData: User) => {

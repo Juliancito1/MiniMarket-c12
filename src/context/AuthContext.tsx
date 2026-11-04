@@ -4,6 +4,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  role: "user" | "admin";
 }
 
 export interface AuthContextType{
@@ -21,4 +22,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
