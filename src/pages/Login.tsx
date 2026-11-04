@@ -1,5 +1,8 @@
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import Swal from "sweetalert2";
+import { useAuth } from "../context/AuthContext";
+import { usuarios } from "../data/users";
 
 type LoginFormData = {
   email: string;
@@ -18,6 +21,38 @@ export const Login = () => {
     },
   });
 
+  const navigate = useNavigate();
+
+  const onLogin = (data: LoginFormData) => {
+    Swal.fire({
+      title: "Bienvenido",
+      text: "Has iniciado sesión correctamente.",
+      icon: "success",
+      background: "#1e293b",
+      color: "#f8fafc",
+    });
+    console.log("Datos del formulario:", data);
+
+    const foundUser = usuarios.find((user) => user.email === data.email);
+
+    if (foundUser) {
+      authContext.login({
+        id: foundUser?.id,
+        name: foundUser?.name,
+        email: data.email,
+      });
+      navigate("/");
+    } else {
+      Swal.fire({
+        title: "Error",
+        text: "Usuario no encontrado, no es posible inicar sesión",
+        icon: "error",
+      });
+    }
+  };
+
+  const authContext = useAuth();
+
   return (
     <section className="flex min-h-full items-center justify-center px-4 py-12">
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-lg sm:p-8 dark:border-slate-700 dark:bg-slate-900">
@@ -33,7 +68,7 @@ export const Login = () => {
           </p>
         </div>
 
-        <form className="space-y-5" noValidate>
+        <form className="space-y-5" noValidate onSubmit={handleSubmit(onLogin)}>
           <div>
             <label
               htmlFor="email"
