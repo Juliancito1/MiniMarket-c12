@@ -75,13 +75,22 @@ export const Navbar = () => {
               </button>
             </>
           ) : (
-            <NavLink
-              className="w-max border-b-transparent hover:border-b-2 hover:border-b-blue-500 hover:text-blue-600"
-              to="/login"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Iniciar Sesión
-            </NavLink>
+            <>
+              <NavLink
+                className="w-max border-b-transparent hover:border-b-2 hover:border-b-blue-500 hover:text-blue-600 lg:mx-2"
+                to="/login"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Iniciar Sesión
+              </NavLink>
+              <NavLink
+                className="w-max border-b-transparent hover:border-b-2 hover:border-b-blue-500 hover:text-blue-600 lg:mx-2"
+                to="/registro"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Registrarme
+              </NavLink>
+            </>
           )}
         </div>
       </nav>
