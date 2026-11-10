@@ -10,9 +10,7 @@ type RegisterFormData = {
 
 export const Register = () => {
   const {
-    register,
     handleSubmit,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormData>({
     defaultValues: {
@@ -71,14 +69,9 @@ export const Register = () => {
               autoComplete="name"
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
               placeholder="Tu nombre"
-              {...register("name", {
-                required: "El nombre es obligatorio.",
-                minLength: {
-                  value: 2,
-                  message: "El nombre debe tener al menos 2 caracteres.",
-                },
-              })}
             />
+            {/* TODO alumnos: conectá este campo con register("name") y agregá
+                validaciones para que sea obligatorio y tenga al menos 2 caracteres. */}
             {errors.name && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.name.message}
@@ -99,14 +92,9 @@ export const Register = () => {
               autoComplete="email"
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
               placeholder="nombre@ejemplo.com"
-              {...register("email", {
-                required: "El correo electrónico es obligatorio.",
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Ingresá un correo electrónico válido.",
-                },
-              })}
             />
+            {/* TODO alumnos: conectá este campo con register("email") y validá
+                que sea obligatorio y tenga formato de correo (pattern / regex). */}
             {errors.email && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.email.message}
@@ -127,14 +115,9 @@ export const Register = () => {
               autoComplete="new-password"
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
               placeholder="Al menos 6 caracteres"
-              {...register("password", {
-                required: "La contraseña es obligatoria.",
-                minLength: {
-                  value: 6,
-                  message: "La contraseña debe tener al menos 6 caracteres.",
-                },
-              })}
             />
+            {/* TODO alumnos: conectá este campo con register("password") y validá
+                que sea obligatorio y tenga al menos 6 caracteres. */}
             {errors.password && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.password.message}
@@ -155,13 +138,9 @@ export const Register = () => {
               autoComplete="new-password"
               className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-900"
               placeholder="Repetí tu contraseña"
-              {...register("confirmPassword", {
-                required: "Confirmar la contraseña es obligatorio.",
-                validate: (value) =>
-                  value === watch("password") ||
-                  "Las contraseñas no coinciden.",
-              })}
             />
+            {/* TODO alumnos: conectá este campo con register("confirmPassword");
+                usá watch("password") en validate para exigir que coincidan. */}
             {errors.confirmPassword && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.confirmPassword.message}
