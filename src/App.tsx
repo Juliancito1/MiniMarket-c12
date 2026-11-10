@@ -4,6 +4,7 @@ import { Login } from "./pages/Login";
 import { Navbar } from "./components/Navbar";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { useAuth } from "./context/AuthContext";
+import { Register } from "./pages/Register";
 
 const AdminRoute = () => {
   const { user } = useAuth();
@@ -22,6 +23,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/registro" element={<Register />} />
           <Route path="/admin" element={<AdminRoute />} />
         </Routes>
       </div>

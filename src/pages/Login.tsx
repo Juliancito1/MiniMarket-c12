@@ -1,8 +1,8 @@
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import Swal from "sweetalert2";
-import { useAuth } from "../context/AuthContext";
-import { usuarios } from "../data/users";
+import { useAuth, type User } from "../context/AuthContext";
+import { getRegisteredUsers, usuarios } from "../data/users";
 
 type LoginFormData = {
   email: string;
@@ -23,33 +23,41 @@ export const Login = () => {
 
   const navigate = useNavigate();
 
-  const onLogin = (data: LoginFormData) => {
-    Swal.fire({
+  const onLogin = async (data: LoginFormData) => {
+    const email = data.email.trim().toLowerCase();
+    const allUsers = [...usuarios, ...getRegisteredUsers()];
+    const foundUser = allUsers.find(
+      (user) =>
+        user.email.trim().toLowerCase() === email &&
+        user.password === data.password,
+    );
+
+    if (!foundUser) {
+      await Swal.fire({
+        title: "No se pudo iniciar sesión",
+        text: "Revisá tu correo y contraseña.",
+        icon: "error",
+      });
+      return;
+    }
+
+    const authenticatedUser: User = {
+      id: foundUser.id,
+      password: foundUser.password,
+      name: foundUser.name,
+      email: foundUser.email,
+      role: foundUser.role,
+    };
+
+    authContext.login(authenticatedUser);
+    await Swal.fire({
       title: "Bienvenido",
       text: "Has iniciado sesión correctamente.",
       icon: "success",
       background: "#1e293b",
       color: "#f8fafc",
     });
-    console.log("Datos del formulario:", data);
-
-    const foundUser = usuarios.find((user) => user.email === data.email);
-
-    if (foundUser) {
-      authContext.login({
-        id: foundUser?.id,
-        name: foundUser?.name,
-        email: data.email,
-        role: foundUser.role,
-      });
-      navigate(foundUser.role === "admin" ? "/admin" : "/");
-    } else {
-      Swal.fire({
-        title: "Error",
-        text: "Usuario no encontrado, no es posible inicar sesión",
-        icon: "error",
-      });
-    }
+    navigate(foundUser.role === "admin" ? "/admin" : "/");
   };
 
   const authContext = useAuth();
@@ -65,7 +73,8 @@ export const Login = () => {
             Iniciar sesión
           </h1>
           <p className="mt-2 text-slate-600 dark:text-slate-300">
-            Ingresá tu correo para iniciar una sesión local de demostración.
+            Ingresá tu correo y contraseña para iniciar una sesión local de
+            demostración.
           </p>
         </div>
 
@@ -133,7 +142,7 @@ export const Login = () => {
           </div>
 
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            La contraseña solo se valida en este formulario y no se guarda.
+            Las cuentas de práctica se guardan localmente en este navegador.
           </p>
 
           <button
@@ -152,6 +161,15 @@ export const Login = () => {
             className="font-medium text-blue-700 hover:underline dark:text-blue-400"
           >
             Ver productos
+          </Link>
+        </p>
+        <p className="mt-3 text-center text-sm text-slate-600 dark:text-slate-300">
+          ¿Todavía no tenés cuenta?{" "}
+          <Link
+            to="/registro"
+            className="font-medium text-blue-700 hover:underline dark:text-blue-400"
+          >
+            Crear cuenta
           </Link>
         </p>
       </div>
